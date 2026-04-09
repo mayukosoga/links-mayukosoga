@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mayuko</title>
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --color-bg:        #f9f7f3;
+      --color-text:      #222222;
+      --color-secondary: #6a6a6a;
+      --color-accent:    #c4874a;
+      --color-surface:   #f2f2f2;
+      --color-border:    #e4e4e4;
+      --shadow-card:
+        rgba(0,0,0,0.02) 0px 0px 0px 1px,
+        rgba(0,0,0,0.04) 0px 2px 6px,
+        rgba(0,0,0,0.10) 0px 4px 8px;
+      --shadow-hover: rgba(0,0,0,0.08) 0px 4px 12px;
+      --radius-btn:  12px;
+      --radius-card: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "Helvetica Neue", "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Page ───────────────────────────────────────────────── */
+    .page {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 60px 20px 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* ── Profile ────────────────────────────────────────────── */
+    .profile { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+
+    .avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: #fff0f3;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      flex-shrink: 0;
+      transform: translateZ(0);
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      mask-image: radial-gradient(white, black);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      image-rendering: smooth;
+    }
+
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--color-accent);
+    }
+
+    .profile-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-secondary);
+      letter-spacing: 0;
+    }
+
+    .profile-bio {
+      font-size: 14px;
+      color: var(--color-secondary);
+      line-height: 1.6;
+      max-width: 360px;
+    }
+
+    /* ── Links ──────────────────────────────────────────────── */
+    .links { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+
+    .link-btn {
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: #ffffff;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .link-btn:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .link-img {
+      width: 140px;
+      flex-shrink: 0;
+      background: var(--color-surface);
+      position: relative;
+    }
+
+    .link-img img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .link-body {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .link-label {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--color-text);
+    }
+
+    .link-sub {
+      font-size: 13px;
+      color: var(--color-secondary);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .link-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--color-accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-bottom-left-radius: 6px;
+    }
+
+    /* ── Section label ──────────────────────────────────────── */
+    .section { width: 100%; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--color-secondary);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    /* ── YouTube grid ───────────────────────────────────────── */
+    .yt-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .yt-card {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: #ffffff;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+
+    .yt-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+    }
+
+    .yt-thumb {
+      width: 140px;
+      min-height: calc(140px * 9 / 16);
+      flex-shrink: 0;
+      background: #ebebeb;
+      position: relative;
+    }
+
+    .yt-thumb img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .yt-play {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .yt-card:hover .yt-play { opacity: 1; }
+
+    .yt-play svg { width: 28px; height: 28px; fill: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4)); }
+
+    .yt-info { flex: 1; min-width: 0; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+
+    .yt-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .yt-date {
+      font-size: 11px;
+      color: var(--color-secondary);
+    }
+
+    .yt-skeleton {
+      width: 100%;
+      height: 92px;
+      border-radius: var(--radius-card);
+      background: linear-gradient(90deg, var(--color-surface) 25%, #ebebeb 50%, var(--color-surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .yt-error {
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-secondary);
+      padding: 20px 0;
+    }
+
+    /* ── Social icons ───────────────────────────────────────── */
+    .socials {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .social-icon:hover { background: var(--color-accent); color: #fff; transform: translateY(-2px); }
+    .social-icon svg { width: 18px; height: 18px; fill: currentColor; }
+    .social-icon svg[stroke] { fill: none; }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .footer {
+      font-size: 12px;
+      color: #c1c1c1;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .yt-thumb { width: 96px; min-height: calc(96px * 9 / 16); }
+      .yt-title { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Profile -->
+  <div class="profile">
+    <div class="avatar">
+      <img src="https://links.mayukosoga.com/wp-content/uploads/2021/10/Portrait_Pink-3-2.jpg" alt="Mayuko" />
+    </div>
+    <div class="profile-name">@mayuko_design</div>
+    <p class="profile-bio">個人事業主・フリーランサーが自分らしいブランドを築けるようサポートしています</p>
+  </div>
+
+  <!-- Links -->
+  <div class="links">
+    <a class="link-btn" href="https://designup-academy.com/workflow" target="_blank" rel="noopener">
+      <div class="link-img">
+        <img src="https://links.mayukosoga.com/wp-content/uploads/2026/02/OGP-branding-workflow.jpg" alt="ブランディング・ワークフロー" />
+      </div>
+      <div class="link-body">
+        <div class="link-label">【無料】ブランディング・ワークフロー</div>
+        <div class="link-sub">「Web制作」から「ブランド作り」へ。プロが現場で使うブランディング・ワークフローの全工程を公開！</div>
+      </div>
+      <span class="link-badge">FREE</span>
+    </a>
+
+    <a class="link-btn" href="https://designup-academy.com/newsletter" target="_blank" rel="noopener">
+      <div class="link-img">
+        <img src="https://links.mayukosoga.com/wp-content/uploads/2023/02/WDB_Newsletter_Mockup-2.jpg" alt="ニュースレター" />
+      </div>
+      <div class="link-body">
+        <div class="link-label">ニュースレター</div>
+        <div class="link-sub">デザインやテクノロジー、クリエイターの新しい働き方・生き方に関する情報に私見を添えてお届けします。</div>
+      </div>
+    </a>
+
+    <!-- Profile Card -->
+    <a class="link-btn" href="https://designup-academy.com/about/" target="_blank" rel="noopener">
+      <div class="link-img">
+        <img src="https://links.mayukosoga.com/wp-content/uploads/2023/02/florida_workation-1024x732-1.jpg" alt="Mayuko Soga" />
+      </div>
+      <div class="link-body">
+        <div class="link-label">プロフィール</div>
+        <div class="link-sub">こんにちは Mayukoです。完全リモートで世界中のクライアントとお仕事をしています。プロフィール詳細はこちら。</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- YouTube -->
+  <div class="section">
+    <p class="section-label">最新のYouTube動画</p>
+    <div class="yt-grid" id="ytGrid">
+      <!-- スケルトン -->
+      <div class="yt-skeleton"></div>
+      <div class="yt-skeleton"></div>
+      <div class="yt-skeleton"></div>
+    </div>
+  </div>
+
+  <!-- Socials -->
+  <div class="socials">
+    <!-- YouTube -->
+    <a class="social-icon" href="https://www.youtube.com/c/MayukoSoga" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+    </a>
+    <!-- Instagram -->
+    <a class="social-icon" href="https://www.instagram.com/mayuko_design/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12c0-3.2 0-3.6.1-4.8C2.4 3.9 4 2.3 7.2 2.3c1.2-.1 1.6-.1 4.8-.1zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1.0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 4.9.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24c3.3 0 3.7 0 4.9-.1 4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9 0-3.3 0-3.7-.1-4.9C23.7 2.7 21.3.3 16.9.1 15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4A6.2 6.2 0 0 0 12 5.8zm0 10.2a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg>
+    </a>
+    <!-- Website -->
+    <a class="social-icon" href="https://designup-academy.com/" target="_blank" rel="noopener" aria-label="Website">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </a>
+  </div>
+
+  <div class="footer">© 2026 Mayuko Soga</div>
+
+</div>
+
+<script>
+  // ▶ チャンネルIDだけここに設定してください（APIキーはサーバー側の .env に記載）
+  const YT_CHANNEL_ID = 'UCjYUu6M4-HZDZWXBXxF0aqQ'; // 例: UCxxxxxxxxxxxxxxxx
+
+  const grid = document.getElementById('ytGrid');
+
+  function relativeDate(iso) {
+    const diff = (Date.now() - new Date(iso)) / 1000;
+    if (diff < 3600)    return `${Math.floor(diff / 60)}分前`;
+    if (diff < 86400)   return `${Math.floor(diff / 3600)}時間前`;
+    if (diff < 604800)  return `${Math.floor(diff / 86400)}日前`;
+    if (diff < 2592000) return `${Math.floor(diff / 604800)}週間前`;
+    return `${Math.floor(diff / 2592000)}ヶ月前`;
+  }
+
+  // タイトルのサニタイズ（XSS対策）
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function loadYouTube() {
+    if (YT_CHANNEL_ID === 'YOUR_CHANNEL_ID') {
+      grid.innerHTML = '<p class="yt-error">index.html の YT_CHANNEL_ID を設定してください</p>';
+      return;
+    }
+
+    try {
+      // APIキーはサーバー側のみ — クライアントはプロキシを呼ぶ
+      const res  = await fetch(`/api/youtube?channelId=${encodeURIComponent(YT_CHANNEL_ID)}&maxResults=5`);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || res.status);
+      }
+      const data = await res.json();
+
+      if (!data.items?.length) {
+        grid.innerHTML = '<p class="yt-error">動画が見つかりませんでした</p>';
+        return;
+      }
+
+      grid.innerHTML = data.items.map(({ id, snippet }) => `
+        <a class="yt-card" href="https://www.youtube.com/watch?v=${encodeURIComponent(id.videoId)}" target="_blank" rel="noopener">
+          <div class="yt-thumb">
+            <img src="${escapeHtml(snippet.thumbnails.medium.url)}" alt="${escapeHtml(snippet.title)}" loading="lazy" />
+            <div class="yt-play">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <div class="yt-info">
+            <div class="yt-title">${escapeHtml(snippet.title)}</div>
+            <div class="yt-date">${relativeDate(snippet.publishedAt)}</div>
+          </div>
+        </a>
+      `).join('');
+
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = `<p class="yt-error">動画の読み込みに失敗しました<br><small>${escapeHtml(String(err.message))}</small></p>`;
+    }
+  }
+
+  loadYouTube();
+</script>
+</body>
+</html>
