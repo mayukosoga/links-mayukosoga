@@ -17,6 +17,13 @@ export async function onRequestGet(context) {
   if (!apiKey)    return Response.json({ error: 'YOUTUBE_API_KEY が設定されていません' }, { status: 500 });
   if (!channelId) return Response.json({ error: 'channelId が必要です' }, { status: 400 });
 
+  // 24時間キャッシュ
+  const cacheKey = new Request(`https://cache.internal/youtube?channelId=${channelId}&maxResults=${maxResults}`);
+  const cache = caches.default;
+
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
   const YT_HEADERS = { Referer: 'https://designup-academy.com/' };
 
   try {
@@ -60,7 +67,15 @@ export async function onRequestGet(context) {
       .filter(v => (durationMap[v.id.videoId] ?? 0) > 60)
       .slice(0, maxResults);
 
-    return Response.json({ items: filtered });
+    const response = new Response(JSON.stringify({ items: filtered }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'max-age=86400', // 24時間
+      }
+    });
+
+    context.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
   } catch (err) {
     return Response.json({ error: err.message || 'サーバーエラー' }, { status: 500 });
   }
