@@ -337,38 +337,11 @@
   </div>
 
   <!-- Links -->
-  <div class="links">
-    <a class="link-btn" href="https://designup-academy.com/workflow" target="_blank" rel="noopener">
-      <div class="link-img">
-        <img src="images/OGP-branding-workflow.jpg" alt="ブランディング・ワークフロー" />
-      </div>
-      <div class="link-body">
-        <div class="link-label">【無料】ブランディング・ワークフロー</div>
-        <div class="link-sub">「Web制作」から「ブランド作り」へ。プロが現場で使うブランディング・ワークフローの全工程を公開！</div>
-      </div>
-      <span class="link-badge">FREE</span>
-    </a>
-
-    <a class="link-btn" href="https://designup-academy.com/newsletter" target="_blank" rel="noopener">
-      <div class="link-img">
-        <img src="images/WDB_Newsletter_Mockup.jpg" alt="ニュースレター" />
-      </div>
-      <div class="link-body">
-        <div class="link-label">ニュースレター</div>
-        <div class="link-sub">デザインやテクノロジー、クリエイターの新しい働き方・生き方に関する情報に私見を添えてお届けします。</div>
-      </div>
-    </a>
-
-    <!-- Profile Card -->
-    <a class="link-btn" href="https://designup-academy.com/about/" target="_blank" rel="noopener">
-      <div class="link-img">
-        <img src="images/profile.jpg" alt="Mayuko Soga" />
-      </div>
-      <div class="link-body">
-        <div class="link-label">プロフィール</div>
-        <div class="link-sub">完全リモートで世界中のクライアントとお仕事をしています。プロフィール詳細はこちら。</div>
-      </div>
-    </a>
+  <div class="links" id="linksList">
+    <!-- Sanity から動的に読み込み -->
+    <div class="yt-skeleton" style="height:92px"></div>
+    <div class="yt-skeleton" style="height:92px"></div>
+    <div class="yt-skeleton" style="height:92px"></div>
   </div>
 
   <!-- YouTube -->
@@ -403,6 +376,55 @@
 </div>
 
 <script>
+  // XSS対策
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ── Sanity リンク読み込み ─────────────────────────────────────
+  const SANITY_PROJECT_ID = 'om46lx84';
+  const SANITY_DATASET    = 'production';
+  const SANITY_API_VER    = '2024-01-01';
+
+  const GROQ = `*[_type == "linkItem" && active != false] | order(order asc) {
+    title, subtitle, url, badge,
+    "imageUrl": image.asset->url
+  }`;
+
+  async function loadLinks() {
+    const linksList = document.getElementById('linksList');
+    try {
+      const query = encodeURIComponent(GROQ);
+      const res   = await fetch(
+        `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VER}/data/query/${SANITY_DATASET}?query=${query}`
+      );
+      if (!res.ok) throw new Error(res.status);
+      const {result} = await res.json();
+
+      if (!result?.length) {
+        linksList.innerHTML = '';
+        return;
+      }
+
+      linksList.innerHTML = result.map(({title, subtitle, url, badge, imageUrl}) => `
+        <a class="link-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+          ${imageUrl ? `<div class="link-img"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" /></div>` : ''}
+          <div class="link-body">
+            <div class="link-label">${escapeHtml(title)}</div>
+            ${subtitle ? `<div class="link-sub">${escapeHtml(subtitle)}</div>` : ''}
+          </div>
+          ${badge ? `<span class="link-badge">${escapeHtml(badge)}</span>` : ''}
+        </a>
+      `).join('');
+    } catch (err) {
+      console.error('Sanity fetch failed:', err);
+      linksList.innerHTML = '';
+    }
+  }
+
+  loadLinks();
+
+  // ── YouTube ──────────────────────────────────────────────────
   // ▶ チャンネルIDだけここに設定してください（APIキーはサーバー側の .env に記載）
   const YT_CHANNEL_ID = 'UCjYUu6M4-HZDZWXBXxF0aqQ'; // 例: UCxxxxxxxxxxxxxxxx
 
@@ -415,11 +437,6 @@
     if (diff < 604800)  return `${Math.floor(diff / 86400)}日前`;
     if (diff < 2592000) return `${Math.floor(diff / 604800)}週間前`;
     return `${Math.floor(diff / 2592000)}ヶ月前`;
-  }
-
-  // タイトルのサニタイズ（XSS対策）
-  function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
   async function loadYouTube() {
