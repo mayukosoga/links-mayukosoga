@@ -1,3 +1,7 @@
+# 環境変数（秘密情報）— .env.example だけは追跡する
 .env
+.env.*
+!.env.example
+
 node_modules/
 .DS_Store
